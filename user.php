@@ -145,7 +145,8 @@ class user
         $this->lastname     = null;
         echo "tu es deco";
       }
-      else{
+      else
+      {
         echo "tu n'etais pas co";
       }
     }
@@ -153,12 +154,26 @@ class user
 
         public function delete()
         {
+          if (!empty($this->login)) 
+          {
+            
             // connexioin à la base de donnée
             $conn = mysqli_connect('localhost', 'root', '', 'classes');
-            $login = $this->login;
-            mysqli_query($conn, "DELETE FROM utilisateurs WHERE login = '$login'");
-            echo "vous avez bien supprimer le user";
+
+            $id = $this->id;
+
+            mysqli_query($conn, "DELETE FROM utilisateurs WHERE id = '$id'");
+            echo "vous avez bien supprimé le user";
+          }
+          else
+          {
+           echo "tu n'etais pas co";
+          }
         }
+
+
+
+
 
                 // Modifier les informations de l’utilisateur en base de données.
         public function update($login, $password, $email, $firstname,$lastname)
@@ -286,18 +301,22 @@ $user1 = new user();
 
 echo "<pre>";
 echo "register <br>";
-print_r($user1 -> register('pierre2' , '123', 'p@gmail.com', 'pierrot', 'toto'));
+// print_r($user1 -> register('pierre' , '123', 'p@gmail.com', 'pierrot', 'toto'));
 echo "connecter <br>"; 
-print_r($user1 -> connect('pierre2','123'));
+print_r($user1 -> connect('pierre','123'));
 
 // $user1 -> disconnect();
 
-$user1 -> update('pietru' , '123', 'p@gmail.com', 'pierrot', 'nono');
+// $user1 -> update('pietru' , '123', 'p@gmail.com', 'pierrot', 'nono');
 
 
 
 
-$user1-> refresh();
+// $user1-> refresh();
+
+$user1 -> delete();
+
+
 
 
 ?>
