@@ -163,16 +163,40 @@ class user
                 // Modifier les informations de l’utilisateur en base de données.
         public function update($login, $password, $email, $firstname,$lastname)
         {
-            // connexion à la base de donnée
-            $conn   = mysqli_connect('localhost', 'root', '', 'classes');
-                $ancien_login  = $this->login;
-                $this->login        = $login;
-                $this->password     = $password;
-                $this->email        = $email;
-                $this->firstname    = $firstname;
-                $this->lastname     = $lastname;
-                mysqli_query($conn, "UPDATE utilisateurs SET 
-                login='$login', password='$password', email='$email', firstname='$firstname', lastname='$lastname' WHERE login='$ancien_login'");
+          if (!empty($this->login))
+          {
+                // connexioin à la base de donnée
+            $conn = mysqli_connect('localhost', 'root', '', 'classes');
+
+                  // Sécurise les input
+            $login = mysqli_escape_string($conn, htmlspecialchars(trim($login)));
+            $password = mysqli_escape_string($conn, htmlspecialchars(trim($password)));
+            $email = mysqli_escape_string($conn, htmlspecialchars(trim($email)));
+            $firstname = mysqli_escape_string($conn, htmlspecialchars(trim($firstname)));
+            $lastname = mysqli_escape_string($conn, htmlspecialchars(trim($lastname)));
+
+            // vide ou pas ?
+            if (!empty($login) && !empty($password) && !empty($email) && !empty($firstname) && !empty($lastname)) 
+            {
+              // récupere la taille 
+              $strlen_login = strlen($login);
+              $strlen_password = strlen($password);
+              $strlen_email = strlen($email);
+              $strlen_firstname = strlen($firstname);
+              $strlen_lastname = strlen($lastname);
+
+              // verifier la longueur 
+              if ($strlen_login<=255 &&  $strlen_password<=255 && $strlen_email<=255 && $strlen_firstname<=255 &&   $strlen_lastname<=255) 
+              {
+                $crypted_password = password_hash($password, PASSWORD_BCRYPT);
+                $id = $this->id;
+
+                  mysqli_query($conn, "UPDATE utilisateurs SET 
+                  login='$login', password='$crypted_password', email='$email', firstname='$firstname', lastname='$lastname' WHERE id=$id");
+              
+              }
+            }
+          }
         }
 
          public function isConnected()
@@ -188,27 +212,68 @@ class user
 
         public function getAllInfos()
         {
-            return(['id' => $this->id, 
-            'login' => $this->login, 
-            'login' => $this->password, 
-            'login' => $this->email, 
-            'login' => $this->firstname, 
-            'login' => $this->lastname]);
+          if (isset($this->login))
+            {
+              return(['id'    => $this->id, 
+                      'login' => $this->login, 
+                      'password' => $this->password, 
+                      'email' => $this->email, 
+                      'firstname' => $this->firstname, 
+                      'lastname' => $this->lastname]);
+            }
+             else echo "connecte toi d'abord";
+
+            
         }
 
         public function getEmail()
         {
-            return($this->email);
+          if (isset($this->login))
+          {
+                return($this->email);
+          }
+          else echo "connecte toi d'abord";            
         }
 
         public function getFirstname()
         {
+          if (isset($this->login))
+          {
             return($this->firstname);
+          }
+          else echo "connecte toi d'abord";
         }
 
         public function getLastname()
         {
+          if (isset($this->login))
+          {
             return($this->lastname);
+          }
+          else echo "connecte toi d'abord";
+        }
+// rafraichier
+
+        public function refresh()
+        {
+          if (!empty($this->login)) 
+          {
+            // conecte toi a la base de donnee -> localhost utilisateur mdp nom de base de donnee
+            $connexion = mysqli_connect("localhost", "root", "", "classes");
+            // fais une requete
+            $query = "SELECT * FROM utilisateurs WHERE id='$this->id'";
+
+            $ok = mysqli_query($connexion, $query);
+
+            $info   = mysqli_fetch_assoc($ok);
+
+            echo "in refresh <br>";
+
+            print_r($info);
+
+          }
+          else echo "connecte toi d'abord";
+
         }
 
 }
@@ -220,13 +285,19 @@ class user
 $user1 = new user();
 
 echo "<pre>";
+echo "register <br>";
+print_r($user1 -> register('pierre2' , '123', 'p@gmail.com', 'pierrot', 'toto'));
+echo "connecter <br>"; 
+print_r($user1 -> connect('pierre2','123'));
 
-// print_r($user1 -> register('pierre2' , '123', 'p@gmail.com', 'pierrot', 'toto'));
+// $user1 -> disconnect();
 
-// print_r($user1 -> connect('pierre2','123'));
+$user1 -> update('pietru' , '123', 'p@gmail.com', 'pierrot', 'nono');
 
-$user1 -> disconnect();
 
+
+
+$user1-> refresh();
 
 
 ?>
