@@ -120,12 +120,12 @@ class user
               $this->firstname = $info["firstname"];
               $this->lastname  = $info["lastname"];
             }
-            return($infouser = array('id' =>$info["id"], 
-                                     'login'=>$info["login"],
-                                     'password'=>$info["password"],
-                                     'email'=>$info["email"],
+            return($infouser = array('id'       =>$info["id"], 
+                                     'login'    =>$info["login"],
+                                     'password' =>$info["password"],
+                                     'email'    =>$info["email"],
                                      'firstname'=>$info["firstname"],
-                                     'lastname'=>$info["lastname"]));
+                                     'lastname' =>$info["lastname"]));
 
               
           }   
@@ -135,11 +135,19 @@ class user
          // Déconnecte l’utilisateur.
     public function disconnect()
     {
+      if (!empty($this->login)) 
+      {
+        $this->id           = null;
         $this->login        = null;
         $this->password     = null;
         $this->email        = null;
         $this->firstname    = null;
         $this->lastname     = null;
+        echo "tu es deco";
+      }
+      else{
+        echo "tu n'etais pas co";
+      }
     }
 
 
@@ -215,6 +223,10 @@ echo "<pre>";
 
 // print_r($user1 -> register('pierre2' , '123', 'p@gmail.com', 'pierrot', 'toto'));
 
-print_r($user1 -> connect('pierre2','123'));
+// print_r($user1 -> connect('pierre2','123'));
+
+$user1 -> disconnect();
+
+
 
 ?>
