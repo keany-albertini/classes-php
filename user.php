@@ -17,7 +17,7 @@ class user
 	
 	public	function  register($login, $password, $email, $firstname, $lastname)
 	{
-		// conecte toi a la base de donnee
+		// conecte toi a la base de donnee -> localhost utilisateur mdp nom de base de donnee
 		$connexion = mysqli_connect("localhost", "root", "", "classes");
 
 		// Sécurise les input
@@ -59,12 +59,21 @@ class user
   					$insert = mysqli_query($connexion,"INSERT INTO utilisateurs(login, password, email, firstname, lastname) VALUES('$login', '$crypted_password', '$email', '$firstname', '$lastname') ");
   					if ($insert) 
   					{
-  						// définir le nouvel attribut
-  						$this->login=$login;
-  						$this->password=$crypted_password;
-  						$this->email=$email;
-  						$this->firstname=$firstname;
-  						$this->lastname=$lastname;
+  						// // définir le nouvel attribut
+  						// $this->login=$login;
+  						// $this->password=$crypted_password;
+  						// $this->email=$email;
+  						// $this->firstname=$firstname;
+  						// $this->lastname=$lastname;
+
+
+              $infouser = array('login' =>$login,
+                                'password' => $crypted_password,
+                                'email' => $email,
+                                'firstname' => $firstname,
+                                'lastname' => $lastname);
+              return $infouser;
+
   					}
   				}
   				else{
@@ -79,21 +88,49 @@ class user
     {
         // connexioin à la base de donnée
         $conn = mysqli_connect('localhost', 'root', '', 'classes');
-        // on verifier si le login et le password qui  existe est juste
-        $ok = mysqli_query($conn, "SELECT * FROM utilisateurs WHERE login='$login' && password='$password'");
-        $info   = mysqli_fetch_assoc($ok);
-        if (isset($info)) 
-        {
 
-            $this->id        = $info["id"];
-            $this->login     = $info["login"];
-        	$this->password  = $info["password"];
-            $this->email     = $info["email"];
-            $this->firstname = $info["firstname"];
-            $this->lastname  = $info["lastname"];
+        // Sécurise les input
+        $login = mysqli_escape_string($conn, htmlspecialchars(trim($login)));
+        $password = mysqli_escape_string($conn, htmlspecialchars(trim($password)));
+
+        // vide ou pas ?
+        if (!empty($login) && !empty($password)) 
+        {
+          // récupere la taille 
+          $strlen_login = strlen($login);
+          $strlen_password = strlen($password);
+
+          if ($strlen_login<=255 &&  $strlen_password<=255) 
+          {
+            // on verifier si le login et le password qui  existe est juste
+            $ok = mysqli_query($conn, "SELECT * FROM utilisateurs WHERE login='$login'");
+
+            $info   = mysqli_fetch_assoc($ok);
+
+            // DEBUG
+            // print_r($info);
+
+            if (password_verify($password, $info['password'])) 
+            {
+             
+              $this->id        = $info["id"];
+              $this->login     = $info["login"];
+            	$this->password  = $info["password"];
+              $this->email     = $info["email"];
+              $this->firstname = $info["firstname"];
+              $this->lastname  = $info["lastname"];
+            }
+            return($infouser = array('id' =>$info["id"], 
+                                     'login'=>$info["login"],
+                                     'password'=>$info["password"],
+                                     'email'=>$info["email"],
+                                     'firstname'=>$info["firstname"],
+                                     'lastname'=>$info["lastname"]));
+
+              
+          }   
         }
-    return([$this->id, $this->login, $this->password, $this->email, $this->firstname, $this->lastname]);
-    }
+      }
 
          // Déconnecte l’utilisateur.
     public function disconnect()
@@ -170,3 +207,14 @@ class user
 
 ?>
    
+<?php  
+
+$user1 = new user();
+
+echo "<pre>";
+
+// print_r($user1 -> register('pierre2' , '123', 'p@gmail.com', 'pierrot', 'toto'));
+
+print_r($user1 -> connect('pierre2','123'));
+
+?>
